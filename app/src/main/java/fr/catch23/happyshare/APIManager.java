@@ -146,7 +146,10 @@ public class APIManager {
     private String getHTTPError(HttpURLConnection urlConnection)
     {
         try {
-            return readString(urlConnection.getErrorStream());
+            InputStream errorstream = urlConnection.getErrorStream();
+            if (errorstream == null)
+                throw new IOException();
+            return readString(errorstream);
         } catch (IOException e) {
             return "Error reading HTTP error message.";
         }
