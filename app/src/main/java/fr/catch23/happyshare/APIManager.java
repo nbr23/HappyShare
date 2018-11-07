@@ -158,8 +158,8 @@ public class APIManager {
     private HttpURLConnection buildHttpPOSTConnection(URL url, String query) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         urlConnection.setRequestMethod("POST");
-        urlConnection.setReadTimeout(10000);
-        urlConnection.setConnectTimeout(15000);
+        urlConnection.setReadTimeout(120000);
+        urlConnection.setConnectTimeout(120000);
         urlConnection.setDoInput(true);
         urlConnection.setDoOutput(true);
 
