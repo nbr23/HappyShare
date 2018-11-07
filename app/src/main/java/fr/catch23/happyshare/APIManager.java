@@ -38,7 +38,7 @@ public class APIManager {
         this.context = context;
         this.mHandler = mHandler;
         this.API_ENDPOINT = context.getString(R.string.api_endpoint);
-        this.API_RESULT_URL = context.getString(R.string.api_endpoint);
+        this.API_RESULT_URL = context.getString(R.string.api_result_url);
         this.API_FROM_FIELD = context.getString(R.string.api_from_field);
     }
 
