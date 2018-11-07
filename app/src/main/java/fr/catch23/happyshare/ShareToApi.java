@@ -32,14 +32,11 @@ public class ShareToApi extends Activity {
                             public void run() {Toast.makeText(context, e.getUser_message(), Toast.LENGTH_LONG).show();}
                         });
                     }
-                    mHandler.post(new Runnable() {
-                          @Override
-                          public void run() {activity.finish(); }
-                      });
                 }
             };
             thread.start();
         }
+        activity.finish();
     }
 }
 
