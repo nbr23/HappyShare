@@ -2,6 +2,7 @@ package fr.catch23.happyshare
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -79,11 +80,14 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
         return builder
     }
 
-    private fun uploadedNotification(builder: NotificationCompat.Builder) {
+    private fun uploadedNotification(builder: NotificationCompat.Builder, image_url: String) {
         NotificationManagerCompat.from(context).apply {
+            var notificationIntent = Intent(Intent.ACTION_VIEW, Uri.parse(image_url));
+            var contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
             builder.setProgress(0, 0, false)
                     .setContentText("Upload completed!")
                     .setOngoing(false)
+                    .setContentIntent(contentIntent)
             notify(notificationID, builder.build())
         }
     }
@@ -159,7 +163,7 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
         mHandler.post {
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("HappyShare", API_RESULT_URL + image_id)
-            uploadedNotification(builder)
+            uploadedNotification(builder, API_RESULT_URL + image_id)
             clipboard.setPrimaryClip(clip)
             Toast.makeText(context, "Content shared, result copied to clipboard", Toast.LENGTH_LONG).show()
         }
