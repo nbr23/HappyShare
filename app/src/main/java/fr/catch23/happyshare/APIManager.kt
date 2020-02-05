@@ -1,17 +1,11 @@
 package fr.catch23.happyshare
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Handler
-import android.support.v4.app.NotificationCompat
-import android.support.v4.app.NotificationManagerCompat
 import android.util.Base64
 import android.widget.Toast
 
@@ -33,15 +27,12 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
     private val API_ENDPOINT: String
     private val API_RESULT_URL: String
     private val API_FROM_FIELD: String
-    private val CHANNEL_ID: String
     private var media_uri: Uri? = null
-    private var notificationID = 123
 
     init {
         this.API_ENDPOINT = context.getString(R.string.api_endpoint)
         this.API_RESULT_URL = context.getString(R.string.api_result_url)
         this.API_FROM_FIELD = context.getString(R.string.api_from_field)
-        this.CHANNEL_ID = context.getString(R.string.notification_channel_id)
     }
 
     private fun displayUserMessage(message: String) {
@@ -66,41 +57,6 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
         return json_param.toString()
     }
 
-    private fun uploadingNotification(context: Context) : NotificationCompat.Builder{
-        var builder = NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(android.support.coreui.R.drawable.notification_icon_background)
-                .setContentTitle("HappyShare")
-                .setContentText("Upload to in progress…")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setOngoing(true)
-                .setProgress(0, 0, true)
-        with(NotificationManagerCompat.from(context)) {
-            notify(notificationID, builder.build())
-        }
-        return builder
-    }
-
-    private fun uploadedNotification(builder: NotificationCompat.Builder, image_url: String) {
-        NotificationManagerCompat.from(context).apply {
-            var notificationIntent = Intent(Intent.ACTION_VIEW, Uri.parse(image_url));
-            var contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
-            builder.setProgress(0, 0, false)
-                    .setContentText("Upload completed!")
-                    .setOngoing(false)
-                    .setContentIntent(contentIntent)
-            notify(notificationID, builder.build())
-        }
-    }
-
-    private fun errorNotification(builder: NotificationCompat.Builder) {
-        NotificationManagerCompat.from(context).apply {
-            builder.setProgress(0, 0, false)
-                    .setContentText("Could not upload the picture, try again later")
-                    .setOngoing(false)
-            notify(notificationID, builder.build())
-        }
-    }
-
     @Throws(ShareException::class)
     fun postToApi(intent: Intent) {
         val image_id: String
@@ -109,28 +65,28 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
         val url: URL
         var urlConnection: HttpURLConnection? = null
 
-        var builder = uploadingNotification(context)
+        var builder = Notify.uploadingNotification(context)
 
         this.media_uri = intent.extras!!.getParcelable<Uri>(Intent.EXTRA_STREAM)
 
         try {
             b64 = convertMediaToB64()
-        } catch (e: IOException) {
-            errorNotification(builder)
+        } catch (e: Exception) {
+            Notify.errorNotification(context, builder)
             throw ShareException("Error while converting media to base64.")
         }
 
         try {
             json_query = getJsonQueryString(API_FROM_FIELD, "", b64)
         } catch (e: JSONException) {
-            errorNotification(builder)
+            Notify.errorNotification(context, builder)
             throw ShareException("Abort: POST Request JSON malformed.")
         }
 
         try {
             url = URL(API_ENDPOINT)
         } catch (e: MalformedURLException) {
-            errorNotification(builder)
+            Notify.errorNotification(context, builder)
             throw ShareException("Abort: Malformed URL.")
         }
 
@@ -139,22 +95,23 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
             urlConnection = buildHttpPOSTConnection(url, json_query)
         } catch (e: IOException) {
             urlConnection?.disconnect()
-            errorNotification(builder)
+            Notify.errorNotification(context, builder)
             throw ShareException("Abort: IOException.")
         }
 
         try {
             image_id = parseResponseJSON(urlConnection, "id")
         } catch (e: IOException) {
-            errorNotification(builder)
+            Notify.errorNotification(context, builder)
             var error = getHTTPError(urlConnection)
             try {
                 error = getJSONKey(error, "errmsg")
             } catch (e1: JSONException) {
+                Notify.errorNotification(context, builder)
             }
             throw ShareException("Abort: $error")
         } catch (e: JSONException) {
-            errorNotification(builder)
+            Notify.errorNotification(context, builder)
             throw ShareException("Abort: Response JSON parse failed.")
         } finally {
             urlConnection.disconnect()
@@ -163,7 +120,7 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
         mHandler.post {
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("HappyShare", API_RESULT_URL + image_id)
-            uploadedNotification(builder, API_RESULT_URL + image_id)
+            Notify.uploadedNotification(context, builder, API_RESULT_URL + image_id)
             clipboard.setPrimaryClip(clip)
             Toast.makeText(context, "Content shared, result copied to clipboard", Toast.LENGTH_LONG).show()
         }
