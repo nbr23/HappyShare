@@ -31,7 +31,7 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
 
     init {
         this.API_ENDPOINT = context.getString(R.string.api_endpoint)
-        this.API_RESULT_URL = context.getString(R.string.api_result_url)
+        this.API_RESULT_URL = context.getString(R.string.api_endpoint) + "api/images"
         this.API_FROM_FIELD = context.getString(R.string.api_from_field)
     }
 
