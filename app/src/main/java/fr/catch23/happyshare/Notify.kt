@@ -4,15 +4,15 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.support.v4.app.NotificationCompat
-import android.support.v4.app.NotificationManagerCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 
 class Notify{
     companion object {
         private var notificationID = 123
         fun uploadingNotification(context: Context): NotificationCompat.Builder {
             var builder = NotificationCompat.Builder(context, context.getString(R.string.notification_channel_id))
-                    .setSmallIcon(android.support.coreui.R.drawable.notification_icon_background)
+                    .setSmallIcon(androidx.core.R.drawable.notification_action_background)
                     .setContentTitle("HappyShare")
                     .setContentText("Upload to in progress…")
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
