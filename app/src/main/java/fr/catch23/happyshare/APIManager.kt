@@ -78,30 +78,29 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
             b64 = convertMediaToB64()
         } catch (e: Exception) {
             Notify.errorNotification(context, builder)
-            throw ShareException("Error while converting media to base64.")
+            throw ShareException("Error while converting media to base64.", e)
         }
 
         try {
             json_query = getJsonQueryString(API_FROM_FIELD, "", b64)
         } catch (e: JSONException) {
             Notify.errorNotification(context, builder)
-            throw ShareException("Abort: POST Request JSON malformed.")
+            throw ShareException("Abort: POST Request JSON malformed.", e)
         }
 
         try {
             url = URL(API_ENDPOINT)
         } catch (e: MalformedURLException) {
             Notify.errorNotification(context, builder)
-            throw ShareException("Abort: Malformed URL.")
+            throw ShareException("Abort: Malformed URL.", e)
         }
 
         try {
-            println(json_query)
             urlConnection = buildHttpPOSTConnection(url, json_query)
         } catch (e: IOException) {
             urlConnection?.disconnect()
             Notify.errorNotification(context, builder)
-            throw ShareException("Abort: IOException.")
+            throw ShareException("Abort: IOException.", e)
         }
 
         try {
@@ -139,8 +138,8 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
 
     @Throws(IOException::class, JSONException::class)
     private fun parseResponseJSON(urlConnection: HttpURLConnection, key: String): String {
-        val `in` = BufferedInputStream(urlConnection.inputStream)
-        return getJSONKey(readString(`in`), key)
+        val response = BufferedInputStream(urlConnection.inputStream)
+        return getJSONKey(readString(response), key)
     }
 
     private fun getHTTPError(urlConnection: HttpURLConnection): String {
