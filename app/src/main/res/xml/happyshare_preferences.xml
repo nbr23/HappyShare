@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen
+xmlns:app="http://schemas.android.com/apk/res-auto">
+
+<EditTextPreference
+    app:key="api_username"
+    app:title="Display name"
+    app:summary="Displayed name of the user uploading the pictures"/>
+<EditTextPreference
+    app:key="api_root_url"
+    app:title="API Root URL"
+    app:summary="Root URL of the OhSnap instance"/>
+</PreferenceScreen>
