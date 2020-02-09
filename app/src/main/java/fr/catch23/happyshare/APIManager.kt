@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Handler
 import android.util.Base64
 import android.widget.Toast
+import androidx.preference.PreferenceManager
 
 import org.json.JSONException
 import org.json.JSONObject
@@ -24,21 +25,7 @@ import java.net.URL
 import java.net.URLEncoder
 
 class APIManager(private val context: Context, private val mHandler: Handler) {
-    private val API_ENDPOINT: String
-    private val API_RESULT_URL: String
-    private val API_FROM_FIELD: String
     private var media_uri: Uri? = null
-
-    init {
-        this.API_ENDPOINT = context.getString(R.string.api_endpoint)
-        if (API_ENDPOINT.endsWith('/')) {
-            this.API_RESULT_URL = context.getString(R.string.api_endpoint) + "api/images"
-        }
-        else {
-            this.API_RESULT_URL = context.getString(R.string.api_endpoint) + "/api/images"
-        }
-        this.API_FROM_FIELD = context.getString(R.string.api_from_field)
-    }
 
     private fun displayUserMessage(message: String) {
         mHandler.post { Toast.makeText(context, message, Toast.LENGTH_LONG).show() }
@@ -70,7 +57,26 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
         val url: URL
         var urlConnection: HttpURLConnection? = null
 
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val API_FROM_FIELD = sharedPreferences.getString("api_username", "")
+        val ROOT_URL = sharedPreferences.getString("api_root_url", "")
+
         var builder = Notify.uploadingNotification(context)
+
+        if (API_FROM_FIELD.isNullOrEmpty() || ROOT_URL.isNullOrEmpty())
+        {
+            Notify.errorNotification(context, builder)
+            throw ShareException("Please fill out the endpoint and From field in the app settings.")
+        }
+
+        val API_ENDPOINT: String
+        if (ROOT_URL.endsWith('/')) {
+            API_ENDPOINT = ROOT_URL + "api/images"
+        }
+        else {
+            API_ENDPOINT = ROOT_URL + "/api/images"
+        }
+
 
         this.media_uri = intent.extras!!.getParcelable<Uri>(Intent.EXTRA_STREAM)
 
@@ -113,18 +119,18 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
             } catch (e1: JSONException) {
                 Notify.errorNotification(context, builder)
             }
-            throw ShareException("Abort: $error")
+            throw ShareException("Abort: $error", e)
         } catch (e: JSONException) {
             Notify.errorNotification(context, builder)
-            throw ShareException("Abort: Response JSON parse failed.")
+            throw ShareException("Abort: Response JSON parse failed.", e)
         } finally {
             urlConnection.disconnect()
         }
 
         mHandler.post {
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clip = ClipData.newPlainText("HappyShare", API_RESULT_URL + image_id)
-            Notify.uploadedNotification(context, builder, API_RESULT_URL + image_id)
+            val clip = ClipData.newPlainText("HappyShare", ROOT_URL + image_id)
+            Notify.uploadedNotification(context, builder, ROOT_URL + image_id)
             clipboard.setPrimaryClip(clip)
             Toast.makeText(context, "Content shared, result copied to clipboard", Toast.LENGTH_LONG).show()
         }
