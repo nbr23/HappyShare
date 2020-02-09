@@ -12,7 +12,7 @@ class Notify{
         private var notificationID = 123
         fun uploadingNotification(context: Context): NotificationCompat.Builder {
             var builder = NotificationCompat.Builder(context, context.getString(R.string.notification_channel_id))
-                    .setSmallIcon(androidx.core.R.drawable.notification_action_background)
+                    .setSmallIcon(R.drawable.ic_notif_happyshare)
                     .setContentTitle("HappyShare")
                     .setContentText("Upload to in progress…")
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
