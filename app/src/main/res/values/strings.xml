@@ -3,6 +3,12 @@
     <string name="notification_channel_name">HappyShare</string>
     <string name="notification_channel_description">Notification for HappyShare ongoing processing</string>
     <string name="notification_channel_id">fr.catch23.happyshare</string>
+    <string name="pref_api_username_title">Display name</string>
+    <string name="pref_api_rooturl_title">API Root URL</string>
     <string name="pref_api_username_summary">Displayed name of the user uploading the pictures</string>
     <string name="pref_api_rooturl_summary">Root URL of the OhSnap instance</string>
+    <string name="notify_uploading">Upload to in progress…</string>
+    <string name="notify_upload_success">Upload completed!</string>
+    <string name="notify_upload_error">Could not upload the picture, try again later</string>
+    <string name="notify_settings_empty">Please fill out the endpoint and From field in the app settings</string>
 </resources>

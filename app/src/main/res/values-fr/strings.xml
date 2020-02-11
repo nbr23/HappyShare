@@ -3,6 +3,12 @@
     <string name="notification_channel_name">HappyShare</string>
     <string name="notification_channel_description">Notification des opérations en cours par HappyShare</string>
     <string name="notification_channel_id">fr.catch23.happyshare</string>
+    <string name="pref_api_username_title">Nom d\'affichage</string>
+    <string name="pref_api_rooturl_title">URL Racine</string>
     <string name="pref_api_username_summary">Nom d\'affichage de l\'utilisateur téléversant la photographie</string>
     <string name="pref_api_rooturl_summary">URL racine de l\'instance OhSnap</string>
+    <string name="notify_uploading">Téléversement en cours…</string>
+    <string name="notify_upload_success">Téléversement terminé !</string>
+    <string name="notify_upload_error">Téléversement impossible, merci d\'essayer plus tard</string>
+    <string name="notify_settings_empty">Veuillez remplir les champs Nom d\'affichage et URL racine dans les paramètres de l\'application</string>
 </resources>
