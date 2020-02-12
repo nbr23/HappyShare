@@ -13,8 +13,8 @@ class Notify{
         fun uploadingNotification(context: Context): NotificationCompat.Builder {
             var builder = NotificationCompat.Builder(context, context.getString(R.string.notification_channel_id))
                     .setSmallIcon(R.drawable.ic_notif_happyshare)
-                    .setContentTitle("HappyShare")
-                    .setContentText("Upload to in progress…")
+                    .setContentTitle(context.getString(R.string.app_name))
+                    .setContentText(context.getString(R.string.notify_uploading))
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .setOngoing(true)
                     .setProgress(0, 0, true)
@@ -29,7 +29,21 @@ class Notify{
                 var notificationIntent = Intent(Intent.ACTION_VIEW, Uri.parse(image_url));
                 var contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
                 builder.setProgress(0, 0, false)
-                        .setContentText("Upload completed!")
+                        .setContentTitle(context.getString(R.string.app_name))
+                        .setContentText(context.getString(R.string.notify_upload_success))
+                        .setOngoing(false)
+                        .setContentIntent(contentIntent)
+                notify(notificationID, builder.build())
+            }
+        }
+
+        fun errorNotificationOpenSettings(context: Context, builder: NotificationCompat.Builder) {
+            NotificationManagerCompat.from(context).apply {
+                var notificationIntent = Intent(context, HappyShareSettingsActivity::class.java);
+                var contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
+                builder.setProgress(0, 0, false)
+                        .setContentTitle(context.getString(R.string.app_name))
+                        .setContentText(context.getString(R.string.notify_settings_empty))
                         .setOngoing(false)
                         .setContentIntent(contentIntent)
                 notify(notificationID, builder.build())
@@ -39,7 +53,8 @@ class Notify{
         fun errorNotification(context: Context, builder: NotificationCompat.Builder) {
             NotificationManagerCompat.from(context).apply {
                 builder.setProgress(0, 0, false)
-                        .setContentText("Could not upload the picture, try again later")
+                        .setContentTitle(context.getString(R.string.app_name))
+                        .setContentText(context.getString(R.string.notify_upload_error))
                         .setOngoing(false)
                 notify(notificationID, builder.build())
             }

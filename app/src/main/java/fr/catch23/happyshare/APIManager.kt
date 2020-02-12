@@ -65,8 +65,8 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
 
         if (API_FROM_FIELD.isNullOrEmpty() || ROOT_URL.isNullOrEmpty())
         {
-            Notify.errorNotification(context, builder)
-            throw ShareException("Please fill out the endpoint and From field in the app settings.")
+            Notify.errorNotificationOpenSettings(context, builder)
+            throw ShareException(context.getString(R.string.notify_settings_empty))
         }
 
         val API_ENDPOINT: String
