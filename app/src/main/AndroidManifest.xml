@@ -26,7 +26,7 @@
         <activity
             android:name=".HappyShareSettingsActivity"
             android:label="HappyShare"
-            android:theme="@style/Theme.AppCompat.Light">
+            android:theme="@style/Theme.AppCompat.DayNight">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
