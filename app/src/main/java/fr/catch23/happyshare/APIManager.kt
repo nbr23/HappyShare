@@ -59,7 +59,7 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
 
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
         val API_FROM_FIELD = sharedPreferences.getString("api_username", "")
-        val ROOT_URL = sharedPreferences.getString("api_root_url", "")
+        var ROOT_URL = sharedPreferences.getString("api_root_url", "")
 
         var builder = Notify.uploadingNotification(context)
 
@@ -69,14 +69,11 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
             throw ShareException(context.getString(R.string.notify_settings_empty))
         }
 
-        val API_ENDPOINT: String
-        if (ROOT_URL.endsWith('/')) {
-            API_ENDPOINT = ROOT_URL + "api/images"
-        }
-        else {
-            API_ENDPOINT = ROOT_URL + "/api/images"
+        if (!ROOT_URL.endsWith('/')) {
+            ROOT_URL = "$ROOT_URL/"
         }
 
+        var API_ENDPOINT = "${ROOT_URL}api/images"
 
         this.media_uri = intent.extras!!.getParcelable<Uri>(Intent.EXTRA_STREAM)
 
