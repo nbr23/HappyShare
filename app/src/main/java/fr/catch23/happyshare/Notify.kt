@@ -50,10 +50,11 @@ class Notify{
             }
         }
 
-        fun errorNotification(context: Context, builder: NotificationCompat.Builder) {
+        fun errorNotification(context: Context, builder: NotificationCompat.Builder, error_msg: String) {
             NotificationManagerCompat.from(context).apply {
                 builder.setProgress(0, 0, false)
                         .setContentTitle(context.getString(R.string.app_name))
+                        .setStyle(NotificationCompat.BigTextStyle().bigText(context.getString(R.string.notify_upload_error) + "\nError: " + error_msg))
                         .setContentText(context.getString(R.string.notify_upload_error))
                         .setOngoing(false)
                 notify(notificationID, builder.build())

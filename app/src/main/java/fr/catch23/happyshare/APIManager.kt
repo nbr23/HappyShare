@@ -44,7 +44,7 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
     private fun getJsonQueryString(from: String, name: String, data: String): String {
         val json_param = JSONObject()
         json_param.put("from", URLEncoder.encode(from))
-        json_param.put("name", "")
+        json_param.put("name", name)
         json_param.put("blob", data)
         return json_param.toString()
     }
@@ -52,7 +52,7 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
     @Throws(ShareException::class)
     fun postToApi(intent: Intent) {
         val image_id: String
-        var b64: String? = null
+        var b64: String?
         val json_query: String
         val url: URL
         var urlConnection: HttpURLConnection? = null
@@ -80,21 +80,21 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
         try {
             b64 = convertMediaToB64()
         } catch (e: Exception) {
-            Notify.errorNotification(context, builder)
+            Notify.errorNotification(context, builder, "Error while converting media to base64.")
             throw ShareException("Error while converting media to base64.", e)
         }
 
         try {
             json_query = getJsonQueryString(API_FROM_FIELD, "", b64)
         } catch (e: JSONException) {
-            Notify.errorNotification(context, builder)
+            Notify.errorNotification(context, builder, "POST Request JSON malformed.")
             throw ShareException("Abort: POST Request JSON malformed.", e)
         }
 
         try {
             url = URL(API_ENDPOINT)
         } catch (e: MalformedURLException) {
-            Notify.errorNotification(context, builder)
+            Notify.errorNotification(context, builder, "Malformed URL.")
             throw ShareException("Abort: Malformed URL.", e)
         }
 
@@ -102,23 +102,23 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
             urlConnection = buildHttpPOSTConnection(url, json_query)
         } catch (e: IOException) {
             urlConnection?.disconnect()
-            Notify.errorNotification(context, builder)
+            Notify.errorNotification(context, builder, "IOException.")
             throw ShareException("Abort: IOException.", e)
         }
 
         try {
             image_id = parseResponseJSON(urlConnection, "id")
         } catch (e: IOException) {
-            Notify.errorNotification(context, builder)
+            Notify.errorNotification(context, builder, "Response JSON parse failed.")
             var error = getHTTPError(urlConnection)
             try {
                 error = getJSONKey(error, "errmsg")
             } catch (e1: JSONException) {
-                Notify.errorNotification(context, builder)
+                Notify.errorNotification(context, builder, "Response JSON parse failed.")
             }
             throw ShareException("Abort: $error", e)
         } catch (e: JSONException) {
-            Notify.errorNotification(context, builder)
+            Notify.errorNotification(context, builder, "Response JSON parse failed.")
             throw ShareException("Abort: Response JSON parse failed.", e)
         } finally {
             urlConnection.disconnect()
