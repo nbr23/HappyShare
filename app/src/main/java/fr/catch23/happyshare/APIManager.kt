@@ -4,21 +4,18 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.ExifInterface
 import android.net.Uri
 import android.os.Handler
 import android.util.Base64
+import android.util.Log
 import android.widget.Toast
 import androidx.preference.PreferenceManager
-
 import org.json.JSONException
 import org.json.JSONObject
-
-import java.io.BufferedInputStream
-import java.io.BufferedWriter
-import java.io.ByteArrayOutputStream
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStreamWriter
+import java.io.*
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
@@ -31,12 +28,34 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
         mHandler.post { Toast.makeText(context, message, Toast.LENGTH_LONG).show() }
     }
 
+    private fun compressImage(data: ByteArray): ByteArray {
+        var image = BitmapFactory.decodeStream(data.inputStream())
+        if (image.byteCount < 999999) {
+            return data
+        }
+
+        val outputFile = File.createTempFile("happyshare", "jpg", context.cacheDir)
+        val compressed_strm = ByteArrayOutputStream()
+        image.compress(Bitmap.CompressFormat.JPEG, 95, outputFile.outputStream())
+
+        val exif = ExifInterface(data.inputStream())
+        if (exif.hasAttribute("Orientation")) {
+            val newexif = ExifInterface(outputFile)
+            newexif.setAttribute("Orientation", exif.getAttribute("Orientation"))
+            newexif.saveAttributes()
+        }
+        return outputFile.readBytes()
+    }
+
     @Throws(IOException::class)
     private fun convertMediaToB64(): String {
         val inputstream = context.contentResolver.openInputStream(media_uri!!)
-        var inputData = readBytes(inputstream!!)
-        val b64 = Base64.encodeToString(inputData, Base64.DEFAULT)
-        inputstream.close()
+        val data = inputstream?.readBytes()
+        inputstream?.close()
+
+        var image = compressImage(data!!)
+        val b64 = Base64.encodeToString(image, Base64.DEFAULT)
+
         return b64.replace("\n".toRegex(), "")
     }
 

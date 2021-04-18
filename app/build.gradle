@@ -3,11 +3,11 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 29
     defaultConfig {
         applicationId "fr.catch23.happyshare"
         minSdkVersion 29
-        targetSdkVersion 30
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
