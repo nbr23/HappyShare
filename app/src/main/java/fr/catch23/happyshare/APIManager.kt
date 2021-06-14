@@ -23,6 +23,7 @@ import java.net.URLEncoder
 
 class APIManager(private val context: Context, private val mHandler: Handler) {
     private var media_uri: Uri? = null
+    private val max_image_size = 1000000
 
     private fun displayUserMessage(message: String) {
         mHandler.post { Toast.makeText(context, message, Toast.LENGTH_LONG).show() }
@@ -30,14 +31,13 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
 
     private fun compressImage(data: ByteArray): ByteArray {
         var image = BitmapFactory.decodeStream(data.inputStream())
-        if (image.byteCount < 999999) {
+        if (data.size < max_image_size) {
             return data
         }
-
+        val ratio = max_image_size.toFloat() / data.size.toFloat()
+        val bitmap = Bitmap.createScaledBitmap(image, (image.width.toFloat() * ratio).toInt(), (image.height.toFloat() * ratio).toInt(), true)
         val outputFile = File.createTempFile("happyshare", "jpg", context.cacheDir)
-        val compressed_strm = ByteArrayOutputStream()
-        image.compress(Bitmap.CompressFormat.JPEG, 95, outputFile.outputStream())
-
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 95, outputFile.outputStream())
         val exif = ExifInterface(data.inputStream())
         if (exif.hasAttribute("Orientation")) {
             val newexif = ExifInterface(outputFile)
@@ -169,7 +169,7 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
             val errorstream = urlConnection.errorStream ?: throw IOException()
             return readString(errorstream)
         } catch (e: IOException) {
-            return "Error reading HTTP error message."
+            return "Error reading HTTP error message [" + urlConnection.responseCode + "]"
         }
 
     }
@@ -182,12 +182,15 @@ class APIManager(private val context: Context, private val mHandler: Handler) {
         urlConnection.connectTimeout = 120000
         urlConnection.doInput = true
         urlConnection.doOutput = true
+        urlConnection.setRequestProperty("Content-Type", "application/json");
+        urlConnection.setRequestProperty("Connection", "Close")
 
         val os = urlConnection.outputStream
-        val writer = BufferedWriter(OutputStreamWriter(os, "UTF-8"))
+        val writer = BufferedWriter(OutputStreamWriter(os))
         writer.write(query)
         writer.flush()
         writer.close()
+        os.flush()
         os.close()
 
         return urlConnection
